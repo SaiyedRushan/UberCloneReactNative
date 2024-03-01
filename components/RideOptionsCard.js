@@ -4,6 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import tw from 'twrnc'
 import { useNavigation } from '@react-navigation/native'
 import { Icon, Image } from 'react-native-elements'
+import { useSelector } from 'react-redux'
+import { selectTravelTimeInformation } from '../slices/navSlice'
 
 const data = [
   {
@@ -26,9 +28,12 @@ const data = [
   },
 ]
 
+const SURGE_CHARGE_RATE = 1.5
+
 const RideOptionsCard = () => {
   const navigation = useNavigation()
   const [selected, setSelected] = useState(null)
+  const travelTimeInformation = useSelector(selectTravelTimeInformation)
 
   return (
     <SafeAreaView style={tw`bg-white flex-shrink`}>
@@ -44,7 +49,7 @@ const RideOptionsCard = () => {
             type="font-awesome"
           />
         </TouchableOpacity>
-        <Text style={tw`text-center py-5 text-xl`}>Select a ride</Text>
+        <Text style={tw`text-center py-5 text-xl`}>Select a ride - {travelTimeInformation?.distance.text}</Text>
       </View>
       <FlatList
         data={data}
@@ -65,14 +70,19 @@ const RideOptionsCard = () => {
 
             <View>
               <Text style={tw`text-xl font-semibold`}>{title}</Text>
-              <Text>Travel time ....</Text>
+              <Text>{travelTimeInformation?.duration.text} Travel time </Text>
             </View>
-            <Text style={tw`text-xl`}>$99</Text>
+            <Text style={tw`text-xl`}>
+              {new Intl.NumberFormat('en-ca', {
+                style: 'currency',
+                currency: 'CAD',
+              }).format((travelTimeInformation?.duration.value * SURGE_CHARGE_RATE * multiplier) / 100)}
+            </Text>
           </TouchableOpacity>
         )}
       />
 
-      <View>
+      <View style={tw`mt-auto border-t border-gray-200`}>
         <TouchableOpacity
           style={tw`bg-black py-3 m-3 ${!selected && 'bg-gray-300'}`}
           disable={!selected}
